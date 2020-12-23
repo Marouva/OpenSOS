@@ -68,12 +68,12 @@ class Requester {
     /**
      * Performs a requests and parses the response
      * @param string $uri
-     * @param int $method
-     * @param string $post
+     * @param string $method
+     * @param string|null $post
      * @param bool $isAJAX
      * @return string
      */
-    public function Request(string $uri, int $method = METHOD_GET, string $post = NULL, bool $isAJAX = false): string {
+    public function Request(string $uri, string $method = 'GET', string $post = NULL, bool $isAJAX = false): string {
         //Set URI
         if (empty($this->htProxy))
             curl_setopt($this->curlHandle, CURLOPT_URL, $uri);
