@@ -21,7 +21,7 @@ class Requester {
         'Cache-Control'             => 'no-cache',
         'DNT'                       => '1',
         'Upgrade-Insecure-Requests' => '1',
-        'User-Agent'                => USER_AGENT,
+        'User-Agent'                => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
         'Sec-Fetch-User'            => '?1',
         'Accept'                    => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
         'Sec-Fetch-Site'            => 'same-site',
@@ -46,9 +46,6 @@ class Requester {
     /** @var string $lastURI */
     private $lastURI;
 
-    /** @var string $htProxy */
-    private $htProxy;
-
     /** @var resource $curlHandle */
     private $curlHandle;
 
@@ -64,7 +61,7 @@ class Requester {
      * Requester destructor.
      */
     public function __destruct() {
-        //De-initialize cURL
+        //Destroy cURL
         curl_close($this->curlHandle);
     }
 
@@ -94,56 +91,12 @@ class Requester {
         curl_setopt($this->curlHandle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curlHandle, CURLOPT_FOLLOWLOCATION, false);
         curl_setopt($this->curlHandle, CURLOPT_HEADER, true);
-        //curl_setopt($this->curlHandle, CURLOPT_USERAGENT, USER_AGENT);
-        //curl_setopt($this->curlHandle, CURLOPT_ENCODING, 'gzip');
 
-        /*
-         * Request method
-         * */
-        switch ($method) {
-            case METHOD_GET:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'GET');
-                break;
-
-            case METHOD_HEAD:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'HEAD');
-                break;
-
-            case METHOD_POST:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
-                break;
-
-            case METHOD_PUT:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'PUT');
-                break;
-
-            case METHOD_DELETE:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                break;
-
-            case METHOD_CONNECT:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'CONNECT');
-                break;
-
-            case METHOD_OPTIONS:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'OPTIONS');
-                break;
-
-            case METHOD_TRACE:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'TRACE');
-                break;
-
-            case METHOD_PATCH:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'PATCH');
-                break;
-
-            default:
-                curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, 'GET');
-                break;
-        }
+        // Request method
+        curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST, $method);
 
         //Post fields
-        if ($method == METHOD_POST AND !empty($post)) {
+        if ($method === 'POST' AND !empty($post)) {
             curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, $post);
         }
 
@@ -296,39 +249,6 @@ class Requester {
             }
         }
 
-        /*
-         * Services
-         * */
-        $host = parse_url($uri, PHP_URL_HOST);
-
-        //Get record
-        $service = Service::Select([
-            'host' => $host
-        ]);
-
-        if (empty($service)) {
-            $service = Service::Create(
-                $host,
-                time(),
-                0
-            );
-        } else
-            $service = $service[array_keys($service)[0]];
-
-        //Error
-        if (!empty(curl_error($this->curlHandle)) OR
-            $this->responseCode >= 400 OR
-            $this->responseCode == 0) {
-            //Increment fail counter
-            $service->SetFailedAttempts($service->GetFailedAttempts() + 1);
-        } else {
-            //Reset fail counter
-            $service->SetFailedAttempts(0);
-
-            //Log attempt
-            $service->SetLastSuccessfulRequest(time());
-        }
-
         return $this->responseBody;
     }
 
@@ -424,22 +344,6 @@ class Requester {
      */
     public function FollowLocation(bool $bool): void {
         $this->followLocation = $bool;
-    }
-
-    /**
-     * @return string
-     */
-    public function GetHTProxy(): string
-    {
-        return $this->htProxy;
-    }
-
-    /**
-     * @param string $htProxy
-     */
-    public function SetHTProxy(string $htProxy): void
-    {
-        $this->htProxy = $htProxy;
     }
 
     /**
