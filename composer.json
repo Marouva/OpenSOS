@@ -1,0 +1,27 @@
+{
+    "name": "marova/open-sos",
+    "description": "Open source knihovna pro tvorbu requestů na Informační Systém SPŠ na Proseku",
+    "type": "library",
+    "require": {
+        "phpseclib/phpseclib": "^3.0",
+        "ext-curl": "*"
+    },
+    "authors": [
+        {
+            "name": "Václav Maroušek",
+            "email": "marouva17@sps-prosek.cz",
+            "role": "Developer"
+        },
+        {
+            "name": "Jan Podroužek",
+            "email": "podroja17@sps-prosek.cz",
+            "role": "Developer"
+        }
+    ],
+    "license": "MIT",
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
+    }
+}

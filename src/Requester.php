@@ -5,8 +5,9 @@
  *
  * requester.php
  */
-//todo: proxying.. až procpe konečně rozchodí to vpn
-//todo: isAJAX, don't change last URL, keep referrer
+
+namespace OpenSOS;
+
 class Requester {
     /** @var array $cookies */
     private $cookies = [];
