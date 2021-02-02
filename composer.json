@@ -1,5 +1,5 @@
 {
-    "name": "marova/open-sos",
+    "name": "marouva/open-sos",
     "description": "Open source knihovna pro tvorbu requestů na Informační Systém SPŠ na Proseku",
     "type": "library",
     "require": {
