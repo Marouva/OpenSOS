@@ -243,7 +243,7 @@ class Requester {
             if ($this->responseCode == 301 OR
                 $this->responseCode == 302 OR
                 $this->responseCode == 303) {
-                return $this->Request($location, METHOD_GET);
+                return $this->Request($location, 'GET');
             } else {
                 return $this->Request($location, $method, $post);
             }

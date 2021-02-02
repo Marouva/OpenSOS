@@ -8,6 +8,12 @@
 
 namespace OpenSOS;
 
+use Crypt_RSA;
+use Math_BigInteger;
+
+define('SOS_URI', 'https://is.sps-prosek.cz/');
+define('SOS_SESSION_LIFETIME', 1920); //32 minutes
+
 class SOS {
     /** @var Requester $requester */
     public $requester;
@@ -37,26 +43,27 @@ class SOS {
     }
 
     /**
-     * @param User $user
+     * @return array
      */
-    public function SaveSession(User $user): void {
-        //Save session info
-        $user->SetMeta('SOS_SESSION_COOKIES', json_encode($this->requester->GetCookies()));
-        $user->SetMeta('SOS_SESSION_KEY',     $this->rsa->getPublicKey());
-        $user->SetMeta('SOS_SESSION_TIME',    time());
+    public function SaveSession(): array {
+        return [
+            'SOS_SESSION_COOKIES' => json_encode($this->requester->GetCookies()),
+            'SOS_SESSION_KEY' => $this->rsa->getPublicKey(),
+            'SOS_SESSION_TIME' => time()
+        ];
     }
 
     /**
-     * @param User $user
+     * @param array $data
      * @return bool
      */
-    public function LoadSession(User $user): bool {
+    public function LoadSession(Array $data): bool {
         //Check session life
-        $sessionTime = $user->GetMeta('SOS_SESSION_TIME');
+        $sessionTime = $data['SOS_SESSION_TIME'];
 
         if (!empty($sessionTime) AND time() < ($sessionTime + SOS_SESSION_LIFETIME)) {
-            $sessionCookies = json_decode($user->GetMeta('SOS_SESSION_COOKIES'), true);
-            $sessionKey = $user->GetMeta('SOS_SESSION_KEY');
+            $sessionCookies = json_decode($data['SOS_SESSION_COOKIES'], true);
+            $sessionKey = $data['SOS_SESSION_KEY'];
 
             if (!empty($sessionCookies) AND !empty($sessionKey)) {
                 //Load session info
@@ -74,6 +81,36 @@ class SOS {
             //Session has expired or has not been initialised
             return false;
         }
+    }
+
+    // ----------------------------------------------------------------
+    // Helper functions
+    // ----------------------------------------------------------------
+
+    public function UserLogin($username, $password) {
+        return $this->Login('userlogin', [
+            'username' => $username,
+            'password' => $this->Encrypt($password)
+        ]);
+    }
+
+    public function MyClassification() {
+        return $this->Classification('myclassification', [
+            'type' => 'student'
+        ]);
+    }
+
+    public function GetTopicAttendance($subjectId) {
+        return $this->St('gettopicattendance', [
+            'subject' => $subjectId
+        ]);
+    }
+
+    public function UserInout($startDate, $endDate) {
+        return $this->Inout('user', [
+            'from' => $startDate,
+            'to' => $endDate
+        ]);
     }
 
     // ----------------------------------------------------------------
@@ -101,7 +138,7 @@ class SOS {
 
         $post = '&data=' . json_encode($data);
 
-        return json_decode($this->requester->Request(SOS_URI . 'login.php?nocache=' . time() .'&function=' . urlencode($function), METHOD_POST, $post), true);
+        return json_decode($this->requester->Request(SOS_URI . 'login.php?nocache=' . time() .'&function=' . urlencode($function), 'POST', $post), true);
     }
 
     /**
@@ -123,7 +160,7 @@ class SOS {
 
         $post = "&data=" . json_encode($data);
 
-        return json_decode($this->requester->Request(SOS_URI . 'classification.php?nocache=' . time() .'&function=' . urlencode($function), METHOD_POST, $post), true);
+        return json_decode($this->requester->Request(SOS_URI . 'classification.php?nocache=' . time() .'&function=' . urlencode($function), 'POST', $post), true);
     }
 
     /**
@@ -137,7 +174,7 @@ class SOS {
 
         $post = "&data=" . json_encode($data);
 
-        return json_decode($this->requester->Request(SOS_URI . 'inout.php?nocache=' . time() .'&function=' . urlencode($function), METHOD_POST, $post), true);
+        return json_decode($this->requester->Request(SOS_URI . 'inout.php?nocache=' . time() .'&function=' . urlencode($function), 'POST', $post), true);
     }
 
     /**
@@ -151,21 +188,7 @@ class SOS {
 
         $post = "&data=" . json_encode($data);
 
-        return json_decode($this->requester->Request(SOS_URI . 'st.php?nocache=' . time() .'&function=' . urlencode($function), METHOD_POST, $post), true);
-    }
-
-    /**
-     * Retrieves attendance
-     * @param $function
-     * @param $data
-     * @return array
-     */
-    public function Tp($function, $data): array {
-        $function = $this->Encrypt($function);
-
-        $post = "&data=" . json_encode($data);
-
-        return json_decode($this->requester->Request(SOS_URI . 'tp.php?nocache=' . time() .'&function=' . urlencode($function), METHOD_POST, $post), true);
+        return json_decode($this->requester->Request(SOS_URI . 'st.php?nocache=' . time() .'&function=' . urlencode($function), 'POST', $post), true);
     }
 
     /**
@@ -179,20 +202,6 @@ class SOS {
 
         $post = "&data=" . json_encode($data);
 
-        return json_decode($this->requester->Request(SOS_URI . 'info.php?nocache=' . time() .'&function=' . urlencode($function), METHOD_POST, $post), true);
-    }
-
-    /**
-     * Classbook requests, useless for students
-     * @param $function
-     * @param $data
-     * @return array
-     */
-    public function Classbook($function, $data): array {
-        $function = $this->Encrypt($function);
-
-        $post = "&data=" . json_encode($data);
-
-        return json_decode($this->requester->Request(SOS_URI . 'classbook.php?nocache=' . time() .'&function=' . urlencode($function), METHOD_POST, $post), true);
+        return json_decode($this->requester->Request(SOS_URI . 'info.php?nocache=' . time() .'&function=' . urlencode($function), 'POST', $post), true);
     }
 }
