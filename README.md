@@ -1,6 +1,11 @@
 # OpenSOS
 Open source knihovna pro tvorbu requestů na Informační Systém SPŠ na Proseku
 
+## Použití
+### Instalace pomocí Composeru
+```
+composer require marouva/open-sos
+```
 ### Ukázka použití
 ```php
 // REQUEST 1
