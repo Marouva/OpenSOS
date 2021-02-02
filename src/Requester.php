@@ -116,7 +116,7 @@ class Requester {
         /*
          * Cookies
          * */
-        $requestCookies = array();
+        $requestCookies = [];
 
         if (!empty($this->cookies)) {
             foreach ($this->cookies as $c => $cookie) {

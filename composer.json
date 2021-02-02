@@ -3,8 +3,10 @@
     "description": "Open source knihovna pro tvorbu requestů na Informační Systém SPŠ na Proseku",
     "type": "library",
     "require": {
+        "php": ">=7.1",
         "phpseclib/phpseclib": "^3.0",
-        "ext-curl": "*"
+        "ext-curl": "*",
+        "ext-json": "*"
     },
     "authors": [
         {
@@ -18,7 +20,7 @@
             "role": "Developer"
         }
     ],
-    "license": "MIT",
+    "license": "WTFPL",
     "autoload": {
         "classmap": [
             "src/"
